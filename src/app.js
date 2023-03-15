@@ -34,6 +34,28 @@ const addPosts = (feedId, items, state) => {
   state.posts = posts.concat(state.posts);
 };
 
+const trackUpdates = (feedId, state, timeout = 1000) => {
+  const feed = state.feeds.find(({ id }) => feedId === id);
+
+  const inner = () => getHttpContents(feed.link)
+    .then(parseRSS)
+    .then((parsedRSS) => {
+      const postsUrls = state.posts
+        .filter((post) => feedId === post.feedId)
+        .map(({ link }) => link);
+      const newItems = parsedRSS.items.filter(({ link }) => !postsUrls.includes(link));
+
+      if (newItems.length > 0) {
+        addPosts(feedId, newItems, state);
+      }
+    })
+    .finally(() => {
+      setTimeout(inner, timeout);
+    });
+
+  setTimeout(inner, timeout);
+};
+
 export default () => {
   const defaultLanguage = 'ru';
 
@@ -103,6 +125,7 @@ export default () => {
             state.feeds.push(feed);
 
             addPosts(feedId, parsedRSS.items, state);
+            trackUpdates(feedId, state);
 
             state.form.url = '';
           })
