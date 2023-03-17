@@ -86,13 +86,16 @@ const handleFeeds = (container, feeds, i18nInstance) => {
   container.replaceChildren(feedsContainer);
 };
 
-const handlePosts = (container, posts, i18nInstance) => {
+const handlePosts = (container, posts, seenIds, i18nInstance) => {
   const listElems = posts.map(({ id, title, link }) => {
     const listElem = buildElement('li', {
       style: ['list-group-item', 'd-flex', 'justify-content-between', 'align-items-baseline', 'border-end-g'],
     });
 
-    const linkElem = buildElement('a', { style: 'fw-bold', textContent: title });
+    const linkElem = buildElement('a', {
+      style: seenIds.has(id) ? 'fw-normal' : 'fw-bold',
+      textContent: title,
+    });
 
     linkElem.href = link;
     linkElem.target = '_blank';
@@ -142,7 +145,17 @@ export default (elements, state, i18nInstance) => (path, value) => {
       break;
 
     case 'posts':
-      handlePosts(elements.posts, value, i18nInstance);
+      handlePosts(elements.posts, value, state.seenIds, i18nInstance);
+      break;
+
+    case 'seenIds':
+      handlePosts(elements.posts, state.posts, state.seenIds, i18nInstance);
+      break;
+
+    case 'modal':
+      elements.modal.title.textContent = value.title;
+      elements.modal.body.textContent = value.description;
+      elements.modal.showFull.href = value.link;
       break;
 
     default:

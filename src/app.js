@@ -34,7 +34,7 @@ const addPosts = (feedId, items, state) => {
   state.posts = posts.concat(state.posts);
 };
 
-const trackUpdates = (feedId, state, timeout = 1000) => {
+const trackUpdates = (feedId, state, timeout = 5000) => {
   const feed = state.feeds.find(({ id }) => feedId === id);
 
   const inner = () => getHttpContents(feed.link)
@@ -81,6 +81,12 @@ export default () => {
         submit: document.querySelector('button[type="submit"]'),
         feeds: document.querySelector('.feeds'),
         posts: document.querySelector('.posts'),
+        modal: {
+          modalElement: document.querySelector('.modal'),
+          title: document.querySelector('.modal-title'),
+          body: document.querySelector('.modal-body'),
+          showFull: document.querySelector('.full-article'),
+        },
       };
 
       const initialState = {
@@ -89,8 +95,16 @@ export default () => {
           url: '',
           error: '',
         },
+
         feeds: [],
         posts: [],
+        seenIds: new Set(),
+
+        modal: {
+          title: '',
+          description: '',
+          link: '',
+        },
       };
 
       const state = onChange(initialState, render(elements, initialState, i18nInstance));
@@ -140,6 +154,16 @@ export default () => {
 
       elements.input.addEventListener('change', (e) => {
         state.form.url = e.target.value.trim();
+      });
+
+      elements.modal.modalElement.addEventListener('show.bs.modal', (e) => {
+        const postId = e.relatedTarget.getAttribute('data-id');
+        const post = state.posts.find(({ id }) => postId === id);
+
+        const { title, description, link } = post;
+
+        state.seenIds.add(postId);
+        state.modal = { title, description, link };
       });
     });
 };
