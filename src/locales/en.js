@@ -14,7 +14,7 @@ export default {
       url: 'The link must be a valid URL',
       exist: 'RSS already exists',
       noRSS: 'No valid RSS founded',
-      networkError: 'Network Problems. Try again',
+      networkError: 'Network Error',
     },
   },
 };
