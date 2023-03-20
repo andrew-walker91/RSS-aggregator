@@ -3,12 +3,7 @@ const buildElement = (tagName, options = {}) => {
   const { style, textContent } = options;
 
   if (style) {
-    if (Array.isArray(style) && style.length > 0) {
-      element.classList.add(...style);
-    }
-    if (typeof style === 'string') {
-      element.classList.add(style);
-    }
+    element.classList.add(...style);
   }
 
   if (textContent) {
@@ -93,7 +88,7 @@ const handlePosts = (container, posts, seenIds, i18nInstance) => {
     });
 
     const linkElem = buildElement('a', {
-      style: seenIds.has(id) ? 'fw-normal' : 'fw-bold',
+      style: seenIds.has(id) ? ['fw-normal'] : ['fw-bold'],
       textContent: title,
     });
 
