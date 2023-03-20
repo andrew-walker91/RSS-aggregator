@@ -19,7 +19,7 @@ const getAllOriginsResponse = (url) => {
 };
 
 const getHttpContents = (url) => getAllOriginsResponse(url)
-  .catch(() => new Error('networkError'))
+  .catch(() => { throw new Error('networkError'); })
   .then((response) => {
     const responseData = response.data.contents;
     return responseData;
