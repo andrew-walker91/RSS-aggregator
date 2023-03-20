@@ -19,10 +19,10 @@ const getAllOriginsResponse = (url) => {
 };
 
 const getHttpContents = (url) => getAllOriginsResponse(url)
-  .catch(() => Promise.reject(new Error('networkError')))
+  .catch(() => new Error('networkError'))
   .then((response) => {
     const responseData = response.data.contents;
-    return Promise.resolve(responseData);
+    return responseData;
   });
 
 const addPosts = (feedId, items, state) => {
@@ -59,12 +59,12 @@ const trackUpdates = (feedId, state, timeout = 5000) => {
 export default () => {
   const defaultLanguage = 'ru';
 
+  const i18nInstance = i18next.createInstance();
+
   setLocale({
     mixed: { default: 'default', notOneOf: 'exist' },
     string: { url: 'url' },
   });
-
-  const i18nInstance = i18next.createInstance();
 
   i18nInstance
     .init({
