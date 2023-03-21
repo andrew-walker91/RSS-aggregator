@@ -34,25 +34,26 @@ const addPosts = (feedId, items, state) => {
   state.posts = posts.concat(state.posts);
 };
 
-const trackUpdates = (feedId, state, timeout = 5000) => {
-  const feed = state.feeds.find(({ id }) => feedId === id);
+const trackUpdates = (feedIds, state, timeout = 5000) => {
+  const feeds = state.feeds.filter(({ id }) => feedIds.includes(id));
 
-  const inner = () => getHttpContents(feed.link)
-    .then(parseRSS)
-    .then((parsedRSS) => {
-      const postsUrls = state.posts
-        .filter((post) => feedId === post.feedId)
-        .map(({ link }) => link);
-      const newItems = parsedRSS.items.filter(({ link }) => !postsUrls.includes(link));
+  const inner = () => {
+    const promises = feeds.map((feed) => getHttpContents(feed.link).then(parseRSS));
 
-      if (newItems.length > 0) {
-        addPosts(feedId, newItems, state);
-      }
-    })
-    .finally(() => {
-      setTimeout(inner, timeout);
-    });
+    Promise.all(promises)
+      .then((results) => results.forEach((parsedRSS, index) => {
+        const feedId = feeds[index].id;
+        const postsUrls = state.posts
+          .filter((post) => feedId === post.feedId)
+          .map(({ link }) => link);
+        const newItems = parsedRSS.items.filter(({ link }) => !postsUrls.includes(link));
 
+        if (newItems.length > 0) {
+          addPosts(feedId, newItems, state);
+        }
+      }))
+      .finally(() => setTimeout(inner, timeout));
+  };
   setTimeout(inner, timeout);
 };
 
