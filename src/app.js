@@ -19,11 +19,11 @@ const getAllOriginsResponse = (url) => {
 };
 
 const getHttpContents = (url) => getAllOriginsResponse(url)
-  .catch(() => { throw new Error('networkError'); })
   .then((response) => {
     const responseData = response.data.contents;
     return responseData;
-  });
+  })
+  .catch(() => { throw new Error('networkError'); });
 
 const addPosts = (feedId, items, state) => {
   const posts = items.map((item) => ({
@@ -35,14 +35,12 @@ const addPosts = (feedId, items, state) => {
 };
 
 const trackUpdates = (feedIds, state, timeout = 5000) => {
-  const feeds = state.feeds.filter(({ id }) => feedIds.includes(id));
-
   const inner = () => {
-    const promises = feeds.map((feed) => getHttpContents(feed.link).then(parseRSS));
+    const promises = state.feeds.map((feed) => getHttpContents(feed.link).then(parseRSS));
 
     Promise.all(promises)
       .then((results) => results.forEach((parsedRSS, index) => {
-        const feedId = feeds[index].id;
+        const feedId = state.feeds[index].id;
         const postsUrls = state.posts
           .filter((post) => feedId === post.feedId)
           .map(({ link }) => link);
@@ -52,7 +50,8 @@ const trackUpdates = (feedIds, state, timeout = 5000) => {
           addPosts(feedId, newItems, state);
         }
       }))
-      .finally(() => setTimeout(inner, timeout));
+      .catch((error) => console.error(error))
+      .then(() => setTimeout(inner, timeout));
   };
   setTimeout(inner, timeout);
 };
