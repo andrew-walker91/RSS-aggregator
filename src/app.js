@@ -109,6 +109,8 @@ export default () => {
 
       const state = onChange(initialState, render(elements, initialState, i18nInstance));
 
+      trackUpdates(state.feeds, state);
+
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
 
@@ -139,7 +141,6 @@ export default () => {
             state.feeds.push(feed);
 
             addPosts(feedId, parsedRSS.items, state);
-            trackUpdates(feedId, state);
 
             state.form.url = '';
           })
