@@ -36,11 +36,17 @@ const addPosts = (feedId, items, state) => {
 
 const trackUpdates = (feedIds, state, timeout = 5000) => {
   const inner = () => {
-    const promises = state.feeds.map((feed) => getHttpContents(feed.link).then(parseRSS));
+    const promises = state.feeds.map((feed) => getHttpContents(feed.link)
+      .then(parseRSS)
+      .catch((error) => ({ error })));
 
-    Promise.all(promises)
-      .then((results) => results.forEach((parsedRSS, index) => {
+    Promise.allSettled(promises)
+      .then((results) => results.forEach((result, index) => {
+        const parsedRSS = result.status === 'fulfilled' ? result.value : null;
         const feedId = state.feeds[index].id;
+
+        if (!parsedRSS) return;
+
         const postsUrls = state.posts
           .filter((post) => feedId === post.feedId)
           .map(({ link }) => link);
@@ -116,9 +122,9 @@ export default () => {
 
         state.form.error = '';
 
-        const getUrlsList = state.feeds.map(({ link }) => link);
+        const urlsList = state.feeds.map(({ link }) => link);
 
-        const schema = string().url().notOneOf(getUrlsList);
+        const schema = string().url().notOneOf(urlsList);
 
         schema
           .validate(state.form.url)
