@@ -15,13 +15,12 @@ It allows you to add an unlimited number of sources (on the right), updates them
 This service is able to request RSS feeds of sites for the presence of new posts and display them in a convenient way, as well as mark what you read.
 ## Installation:
 
-Clone this repository on your machine in the project directory.
-
-`git clone git@github.com:andrew-walker91/frontend-project-11.git`
-
-`make install`
-
-`make build`
+Just 3 commands for a quick start
+```
+git clone git@github.com:andrew-walker91/RSS-aggregator
+make install
+make build
+```
 
 ## How to use:
  - Insert a valid RSS link into the input field.
